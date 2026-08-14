@@ -336,6 +336,12 @@
       The integration with the Google Ads API follows the principle of least privilege, with limited read-only analytical queries and a single automated safeguard mutation:
     </p>
 
+    <div class="callout">
+      <p>
+        <strong>Current status:</strong> the integration is implemented and awaiting a Basic Access developer token. At the current access level, the calls described below return <code>PERMISSION_DENIED</code>, so no production API traffic is being generated yet. The scope described here is the complete set of operations the tool performs &mdash; nothing beyond it is implemented.
+      </p>
+    </div>
+
     <div class="grid-2">
       <div class="feature-item">
         <div class="feature-header">
@@ -343,7 +349,7 @@
           <span class="badge">Read-Only</span>
         </div>
         <p style="font-size: 0.92rem;">
-          Calls <code>KeywordPlanIdeaService.GenerateKeywordIdeas</code> to analyze search volume metrics, historical trends, and competition indices prior to campaign creation.
+          Calls <code>KeywordPlanIdeaService.GenerateKeywordIdeas</code> to retrieve average monthly search volume, competition level and index, and top-of-page bid ranges for a product category, before deciding whether a campaign is worth running.
         </p>
       </div>
 
@@ -353,7 +359,7 @@
           <span class="badge">Read-Only</span>
         </div>
         <p style="font-size: 0.92rem;">
-          Uses <code>GoogleAdsService.SearchStream</code> to query campaign performance snapshots (impressions, clicks, spend, and conversion events) on scheduled intervals.
+          Designed to use <code>GoogleAdsService.SearchStream</code> to query campaign performance (impressions, clicks, spend, and conversion events). This retrieval is not yet active: the diagnostic stage currently reads a performance report exported manually from the Google Ads interface, and will read the same fields directly from the API once access is granted.
         </p>
       </div>
 
@@ -363,7 +369,7 @@
           <span class="badge badge-write">Safe Mutate</span>
         </div>
         <p style="font-size: 0.92rem;">
-          Invokes <code>CampaignService.MutateCampaigns</code> exclusively to transition campaign status to <code>PAUSED</code> when real-time ad spend crosses pre-set tolerance thresholds without recorded conversions. This is the only write operation executed programmatically.
+          Invokes <code>CampaignService.MutateCampaigns</code> exclusively to transition campaign status to <code>PAUSED</code>. This is the only write operation the tool performs. It is triggered by a fixed arithmetic rule evaluated against a campaign's own reported figures &mdash; spend has reached at least one full commission, click-through rate is below a set threshold, and no conversion has been recorded. Any campaign that does not match that rule exactly, including any campaign with incomplete data, is reported to the operator instead of being acted upon. No language model participates in this decision.
         </p>
       </div>
     </div>
@@ -374,7 +380,7 @@
     <ul>
       <li><strong>No Autonomous Budget Escalation:</strong> The tool is technically incapable of increasing campaign budgets, raising maximum CPC bids, or publishing new campaigns autonomously.</li>
       <li><strong>Mandatory Human Approval:</strong> Campaign creation, ad creative updates, and budget allocation decisions require explicit manual review and execution by the account manager.</li>
-      <li><strong>Audit Logging:</strong> All automated pause events and API telemetry reads are permanently logged with timestamps for retrospective auditing.</li>
+      <li><strong>Audit Logging:</strong> Every Google Ads API call the tool makes &mdash; each read and each automated pause, whether it succeeds or fails &mdash; is written as a separate timestamped entry to an append-only local log. Entries are never overwritten or removed by the tool, so the full sequence of API activity can be reviewed after the fact.</li>
     </ul>
   </section>
 
