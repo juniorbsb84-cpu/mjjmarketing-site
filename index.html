@@ -381,7 +381,7 @@
   <section class="card">
     <h2>4. Security and Data Protection</h2>
     <p>
-      API credentials, OAuth refresh tokens, and operational parameters are secured using encrypted local environment configurations (12-Factor App standards). No advertiser data, performance telemetry, or customer information is transmitted to external vendors or third-party networks.
+      API credentials, OAuth refresh tokens, and operational parameters are stored in a local environment file (12-Factor App standards), excluded from version control and restricted to the operating system account that runs the tool. Credentials are never committed to any repository, never printed to logs, and never sent to any third party. No advertiser data, performance telemetry, or customer information is transmitted to external vendors or third-party networks.
     </p>
   </section>
 </main>
